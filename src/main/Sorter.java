@@ -43,12 +43,14 @@ public class Sorter {
 
         while(true) {
             
-            // ask user for comparison and obtain input
-            System.out.println("Which is ranked higher: (1) " + name + " or (2) " + sort.get(check) + "?");
+            // ask user for comparison and obtain input (random order)
+            int order = (int) (Math.random() * 2);
+            if(order == 0) System.out.println("Which is ranked higher: (1) " + name + " or (2) " + sort.get(check) + "?");
+            else System.out.println("Which is ranked higher: (1) " + sort.get(check) + " or (2) " + name + "?");
             String input = s.nextLine();
 
             // case 1
-            if(input.equals("1")) {
+            if((input.equals("1") && order == 0) || (input.equals("2") && order == 1)) {
 
                 // truncate list before and including check
                 sort = sort.subList(check + 1, sort.size());
@@ -59,7 +61,7 @@ public class Sorter {
             }
 
             // case 2
-            else if(input.equals("2")) {
+            else if((input.equals("2") && order == 0) || (input.equals("1") && order == 1)) {
 
                 // truncate list after and including check
                 sort = sort.subList(0,check);
