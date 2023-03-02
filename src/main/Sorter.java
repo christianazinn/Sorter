@@ -1,22 +1,12 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Sorter {
     public static void main(String[] args) throws IOException {
 
-        // get i/o files
-        BufferedReader r = new BufferedReader(new FileReader("../txt/SorterInput.txt"));
-        PrintWriter pw = new PrintWriter(new FileWriter("../txt/SorterOutput.txt"));
-
         // initialize unsorted and sorted lists
-        ArrayList<String> names = new ArrayList<String>();
+        ArrayList<String> names = readInput("../txt/SorterInput.txt");
         ArrayList<String> sortedNames = new ArrayList<String>();
-
-        // read into unsorted list from input file and close input
-        while(r.ready()) names.add(r.readLine());
-        r.close();
 
         // add a singular element to the sorted list to start it
         sortedNames.add(names.remove(0));
@@ -24,9 +14,25 @@ public class Sorter {
         // sort the list
         for(String n : names) placeIntoLocation(n, sortedNames);
 
-        // write sorted list to output file and close output
-        for(int i = sortedNames.size() - 1; i >= 0; i--) pw.println(sortedNames.get(i));
-        pw.close();
+        // write sorted list
+        writeFile(sortedNames, "../txt/SorterOutput.txt");
+
+        // read csv
+        TreeMap<String,Integer> dict = readCsv("../static_txt/TotalValues.csv");
+
+        // update values with rating (higher is harder)
+        for(int i = 0; i < sortedNames.size(); i++) {
+            try {
+                String key = sortedNames.get(i);
+                dict.put(key, dict.get(key) + i);
+            }
+            catch(Exception e) {
+                System.out.println("uh something went wrong with updating dict values???");
+            }
+        }
+
+        // write csv
+        writeCsv(dict, "../static_txt/TotalValues.csv");
     }
 
 
@@ -78,5 +84,81 @@ public class Sorter {
 
         // add new element at the relative position
         sortedNames.add(origPos, name);
+    }
+
+
+    public static ArrayList<String> readInput(String filename) throws FileNotFoundException, IOException {
+
+        // initialize arraylist and filereader
+        ArrayList<String> names = new ArrayList<String>();
+        BufferedReader r = new BufferedReader(new FileReader(filename));
+
+        // add all lines to arraylist
+        while(r.ready()) names.add(r.readLine());
+
+        // flush and return
+        r.close();
+        return names;
+    }
+
+
+    public static void writeFile(ArrayList<String> sortedNames, String filename) throws FileNotFoundException, IOException {
+
+        // initialize filewriter
+        PrintWriter pw = new PrintWriter(new FileWriter(filename));
+
+        // write in reverse order (highest to lowest)
+        for(int i = sortedNames.size() - 1; i >= 0; i--) pw.println(sortedNames.get(i));
+
+        // flush and exit
+        pw.close();
+    }
+
+
+    public static TreeMap<String,Integer> readCsv(String filename) throws FileNotFoundException, IOException {
+
+        // initialize treemap and filereader
+        TreeMap<String,Integer> dict = new TreeMap<String,Integer>();
+        BufferedReader r = new BufferedReader(new FileReader(filename));
+
+        // add all lines to treemap
+        while(r.ready()) {
+            String line = r.readLine();
+
+            // split lines into key and value
+            int idx = line.indexOf(",");
+            String name = line.substring(0,idx);
+            int rating = Integer.parseInt(line.substring(idx+1));
+
+            // put key-val pair into treemap
+            dict.put(name,rating);
+        }
+
+        // flush and return
+        r.close();
+        return dict;
+    }
+
+    public static void writeCsv(TreeMap<String,Integer> dict, String filename) throws FileNotFoundException, IOException {
+
+        // initialize filewriter
+        PrintWriter pw = new PrintWriter(new FileWriter(filename));
+
+        // initialize comparator for treemap sorting
+        Comparator<String> comp = new Comparator<String>() {
+            public int compare(String o1, String o2) {
+                return dict.get(o2).compareTo(dict.get(o1));
+            }
+        };
+
+        // create new treemap using comparator and copy all values over
+        TreeMap<String,Integer> sortedMap = new TreeMap<String,Integer>(comp);
+        sortedMap.putAll(dict);
+
+        // write each value in the sorted treemap
+        for(String s : sortedMap.keySet()) pw.println(s + "," + sortedMap.get(s));
+
+        // flush and exit
+        pw.close();
     }
 }
