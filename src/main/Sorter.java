@@ -96,6 +96,15 @@ public class Sorter {
         // add all lines to arraylist
         while(r.ready()) names.add(r.readLine());
 
+        // randomize order
+        for(int i = 0; i < names.size() / 2; i++) {
+            int idx1 = (int) (Math.random() * names.size());
+            int idx2 = (int) (Math.random() * names.size());
+            String temp = names.get(idx1);
+            names.set(idx1, names.get(idx2));
+            names.set(idx2, temp);
+        }
+
         // flush and return
         r.close();
         return names;
@@ -138,6 +147,7 @@ public class Sorter {
         r.close();
         return dict;
     }
+
 
     public static void writeCsv(TreeMap<String,Integer> dict, String filename) throws FileNotFoundException, IOException {
 
